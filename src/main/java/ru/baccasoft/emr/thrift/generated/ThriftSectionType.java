@@ -11,17 +11,15 @@ import java.util.Map;
 import java.util.HashMap;
 import org.apache.thrift.TEnum;
 
-public enum ThriftCaseType implements org.apache.thrift.TEnum {
+public enum ThriftSectionType implements org.apache.thrift.TEnum {
   PROBLEM(0),
-  RESULT(1),
-  PROCEDURE(2),
-  ENCOUNTER(3),
-  PLANOFCARE(4),
-  ALLERGIES(5);
+  PROCEDURE(1),
+  ENCOUNTER(2),
+  MEDICATION(3);
 
   private final int value;
 
-  private ThriftCaseType(int value) {
+  private ThriftSectionType(int value) {
     this.value = value;
   }
 
@@ -36,20 +34,16 @@ public enum ThriftCaseType implements org.apache.thrift.TEnum {
    * Find a the enum type by its integer value, as defined in the Thrift IDL.
    * @return null if the value is not found.
    */
-  public static ThriftCaseType findByValue(int value) { 
+  public static ThriftSectionType findByValue(int value) { 
     switch (value) {
       case 0:
         return PROBLEM;
       case 1:
-        return RESULT;
-      case 2:
         return PROCEDURE;
-      case 3:
+      case 2:
         return ENCOUNTER;
-      case 4:
-        return PLANOFCARE;
-      case 5:
-        return ALLERGIES;
+      case 3:
+        return MEDICATION;
       default:
         return null;
     }

@@ -85,29 +85,28 @@ struct ThriftUserData {
 	2: string role,
 }
 
-//Типы кейсов
-enum ThriftCaseType {
-    PROBLEM,RESULT,PROCEDURE,ENCOUNTER,PLANOFCARE,ALLERGIES
+// Типы секций
+enum ThriftSectionType {
+    PROBLEM,PROCEDURE,ENCOUNTER,MEDICATION,
 }
 
+// Секция Encounter
 struct ThriftCaseData {
 		// идентификатор кейса
 	1: string caseID,
-		// тип кейса
-   	2: ThriftCaseType caseType,
    		// идентификатор пациента
-    3: string patientID,
+    2: string patientID,
 		// тип взаимодействия с клиникой
-	4: string caseName,
+	3: string caseName,
 		// название клиники
-	5: string clinicName,
+	4: string clinicName,
 		// дата кейса YYYY-MM-DD
-	6: string insertedAt,
+	5: string startDate,
 		// доктор
-	7: string author,
+	6: string doctor,
 }
 
-struct ThriftCaseTypeProblemData {
+struct ThriftSectionProblemData {
 		// группа заболевания
 	1: string diseaseGroup,
 		// заболевание
@@ -118,9 +117,11 @@ struct ThriftCaseTypeProblemData {
 	4: string status,
 		// дата начала заболевания
 	5: string effectiveStartDate,
+		// дата окончания заболевания
+	6: string effectiveEndDate,
 }
 
-struct ThriftCaseTypeProcedureData {
+struct ThriftSectionProcedureData {
 		// система органов
 	1: string bodySystem,
 		// назначенная процедура
@@ -131,67 +132,63 @@ struct ThriftCaseTypeProcedureData {
 	4: string year,
 		// статус (открыт/закрыт)
 	5: string status,
+		// описание процедруы
+	6: string description,
 }
 
-struct ThriftCaseTypeEncounterData {
-		// место встречи (приема пациента)
-	1: string encounterLocation,
-		// тип места
-	2: string locationType,
+struct ThriftSectionEncounterData {
 		// больница
-	3: string hospital,
-		// доктор
-	4: string doctor,
-		// дата начала посещений
-	5: string startDate,
-		// дата окончания посещений
-	6: string endDate,
+    1: string hospital,
+		// отделение
+	2: string department,
 		// тип взаимодействия
-	7: string interactionType,
+    3: string interactionType,
+		// доктор
+    4: string doctor,
+		// дата начала посещений
+    5: string startDate,
+        // дата окончания посещений
+    6: string endDate,
+     	// результат приема
+    7: string encounterOutcome,
 		// номер кейса
-	8: string caseNumber,
-		// результат приема
-	9: string encounterOutcome,
+    8: string caseNumber,
 }
 
 struct ThriftCaseDetailData {
 		// кейс
-	1: ThriftCaseData caseData,
-		// данные для типа Problem
-	2: ThriftCaseTypeProblemData problemData,
-		// данные для типа Procedure
-	3: ThriftCaseTypeProcedureData procedureData,
-		// данные для типа Encounter
-	4: ThriftCaseTypeEncounterData encounterData,
+	//1: ThriftCaseData caseData,
+	1: string caseID,
+		// данные секции Encounters
+    2: ThriftSectionEncounterData encounterData,
+		// данные секции Problems
+	3: ThriftSectionProblemData problemData,
+		// данные секции Procedure;
+	4: ThriftSectionProcedureData procedureData,
+		// данные секции Medications&ePrescriptions
+	5: ThriftSectionMedicationData medicationData,
 }
 
-struct ThriftMedicationData {
+struct ThriftSectionMedicationData {
 		// идентификатор пациента
 	1: string patientID,
 		// идентификатор кейса
 	2: string caseID,
+		// номер рецепта
+	3: string ePrescriptionN,
 		// лекарство
-	3: string medication,
-		// доза
-	4: string dose,
-		// форма выпуска
-	5: string form,
-		// инструкция
-	6: string instructions,
+	4: string drug,
+		// дозировка
+	5: string dosage,
 		// начало приема YYYY-MM-DD
-	7: string startDate,
+	6: string startDate,
 		// окончание приема YYYY-MM-DD
-	8: string endDate,
+	7: string endDate,
 		// статус
-	9: string status,
-		// дата кейса YYYY-MM-DD
-	10: string insertedAt,
-		// доктор
-	11: string author,
-		// рецепт (PDF)
-	12: string prescription,
+	8: string status,
+		// инструкции по применению
+    9: string instructions,
 }
-
 
 struct ThriftFamilyDoctorData {
 		// Имя
@@ -284,7 +281,7 @@ service ThriftPatientService {
 	list<ThriftCaseData> getPatientCases( 1: string patientId, 2: string dateStart, 3: string dateEnd ) throws ( 1: ThriftException ex ),
 
 	//Получение списка лекраственных назначений по пациенту (6.1.6,6.1.9)
-	list<ThriftMedicationData> getPatientMedications( 1: string patientId ) throws ( 1: ThriftException ex ),
+	list<ThriftSectionMedicationData> getPatientMedications( 1: string patientId ) throws ( 1: ThriftException ex ),
 }
 
 service ThriftDoctorService {
@@ -308,7 +305,7 @@ service ThriftDoctorService {
 	ThriftCaseDetailData insertCaseDetail( 1: ThriftCaseDetailData caseDetailData) throws ( 1: ThriftException ex ),
 
 	//Получения списка последних рецептов для доктора (6.1.9)
-	list<ThriftMedicationData> getLastDoctorMedications( 1: string doctorPatientId, 2: i32 listSizeMax ) throws ( 1: ThriftException ex ),
+	list<ThriftSectionMedicationData> getLastDoctorMedications( 1: string doctorPatientId, 2: i32 listSizeMax ) throws ( 1: ThriftException ex ),
 
 }
 
