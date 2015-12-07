@@ -133,7 +133,9 @@ struct ThriftSectionProcedureData {
 		// статус (открыт/закрыт)
 	5: string status,
 		// описание процедруы
-	6: string description,
+	6: string pDescription,
+		// дата
+	7: string date;
 }
 
 struct ThriftSectionEncounterData {
@@ -155,20 +157,6 @@ struct ThriftSectionEncounterData {
     8: string caseNumber,
 }
 
-struct ThriftCaseDetailData {
-		// кейс
-	//1: ThriftCaseData caseData,
-	1: string caseID,
-		// данные секции Encounters
-    2: ThriftSectionEncounterData encounterData,
-		// данные секции Problems
-	3: ThriftSectionProblemData problemData,
-		// данные секции Procedure;
-	4: ThriftSectionProcedureData procedureData,
-		// данные секции Medications&ePrescriptions
-	5: ThriftSectionMedicationData medicationData,
-}
-
 struct ThriftSectionMedicationData {
 		// идентификатор пациента
 	1: string patientID,
@@ -178,16 +166,32 @@ struct ThriftSectionMedicationData {
 	3: string ePrescriptionN,
 		// лекарство
 	4: string drug,
+		// активное вещество
+	5: string activeSubstance
 		// дозировка
-	5: string dosage,
+	6: string dose,
 		// начало приема YYYY-MM-DD
-	6: string startDate,
+	7: string startDate,
 		// окончание приема YYYY-MM-DD
-	7: string endDate,
+	8: string endDate,
 		// статус
-	8: string status,
+	9: string status,
 		// инструкции по применению
-    9: string instructions,
+    10: string instructions,
+}
+
+struct ThriftCaseDetailData {
+		// кейс
+	//1: ThriftCaseData caseData,
+	1: string caseID,
+		// данные секции Encounters
+    2: ThriftSectionEncounterData encounterData,
+		// данные секции Problems
+	3: list<ThriftSectionProblemData> problemData,
+		// данные секции Procedure
+	4: list<ThriftSectionProcedureData> procedureData,
+		// данные секции Medications&ePrescriptions
+	5: list<ThriftSectionMedicationData> medicationData,
 }
 
 struct ThriftFamilyDoctorData {
@@ -296,7 +300,7 @@ service ThriftDoctorService {
 	list<ThriftCaseData> getLastDoctorCases( 1: string doctorPatientId, 2: i32 listSizeMax ) throws ( 1: ThriftException ex ),
 
 	//Получение детализации кейса (5.6.7.1,5.6.8.1,6.1.5.1,6.1.8)
-	list<ThriftCaseDetailData> getCaseDetail( 1: string caseId, 2: string patientId ) throws ( 1: ThriftException ex ),
+	ThriftCaseDetailData getCaseDetail( 1: string caseId, 2: string patientId ) throws ( 1: ThriftException ex ),
 
 	//Обновить кейс (п.5.6.8.1,п.6.1.8)
 	bool updateCaseDetail( 1: ThriftCaseDetailData caseDetailData) throws ( 1: ThriftException ex ),
