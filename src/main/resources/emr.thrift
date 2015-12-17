@@ -4,7 +4,7 @@ namespace java ru.baccasoft.emr.thrift.generated
 enum ThriftExceptionType {
 	// Неверная версия протокола обмена МП-ПСС. Необходимо обновить клиент.
 	SERVICE_VERSION_MISMATCH,
-	
+
 	// Аутентификация пользователя не прошла. Либо (при вызове сервиса аутентификации) указаны неправильные
 	// учетные данные, либо (при обычной работе) протух токен и требуется повторная аутентификация.
 	AUTHENTICATION_FAILED,
@@ -17,11 +17,11 @@ enum ThriftExceptionType {
 exception ThriftException {
 	// Тип ошибки.
 	1: ThriftExceptionType typeCode,
-	
+
 	// Сообщение об ошибке. Предназначено для логгирования, не является человекочитаемым. Может быть null.
 	2: string logErrorMsg,
-	
-	// Сообщение об ошибке. Предназначено для пользователя. 
+
+	// Сообщение об ошибке. Предназначено для пользователя.
 	3: string userErrorMsg,
 
 	// url, по которому находится обновление при SERVICE_VERSION_MISMATCH, иначе ""
@@ -41,22 +41,25 @@ struct ThriftRequestCommonData {
 	// Уникальный идентификатор клиента. Должен генерироваться в момент установки МП на устройство, должен
 	// однозначно идентифицировать данное устройство среди всех устройств данной платформы, на которых установлено МП
 	2: string deviceId,
-	
-	// Логин пользователя. Null для анонимного доступа. 
+
+	// Логин пользователя. Null для анонимного доступа.
 	3: string userLogin,
-	
-	// Аутентификационный токен пользователя. Если логин null, значение игнрируется, в противном случае непустая строка. 
-	4: string authToken,
+
+	// Пароль пользователя.
+	4: string password,
+
+	// Аутентификационный токен пользователя. Если логин null, значение игнорируется, в противном случае - непустая строка.
+	5: string authToken,
 
 	// платформа, на которой живёт данный клиент
-	5: ThriftPlatformType clientPlatform,
+	6: ThriftPlatformType clientPlatform,
 
 	// Идентификатор устройства для рассылки пуш-уведомлений (зависит от платформы).
     // нулл или пустая строка допускаются, если пользователь запретил пуши
-	6: string pushToken,
+	7: string pushToken,
 
     // версия клиента
-    7: string clientVersion,
+    8: string clientVersion,
 }
 
 struct ThriftPingResponse {
@@ -158,26 +161,28 @@ struct ThriftSectionEncounterData {
 }
 
 struct ThriftSectionMedicationData {
+		// идентификатор назначения
+	1: string medicationID
 		// идентификатор пациента
-	1: string patientID,
+	2: string patientID,
 		// идентификатор кейса
-	2: string caseID,
+	3: string caseID,
 		// номер рецепта
-	3: string ePrescriptionN,
+	4: string ePrescriptionN,
 		// лекарство
-	4: string drug,
+	5: string drug,
 		// активное вещество
-	5: string activeSubstance
+	6: string activeSubstance
 		// дозировка
-	6: string dose,
+	7: string dose,
 		// начало приема YYYY-MM-DD
-	7: string startDate,
+	8: string startDate,
 		// окончание приема YYYY-MM-DD
-	8: string endDate,
+	9: string endDate,
 		// статус
-	9: string status,
+	10: string status,
 		// инструкции по применению
-    10: string instructions,
+    11: string instructions,
 }
 
 struct ThriftCaseDetailData {
@@ -215,101 +220,23 @@ struct ThriftPatientSummaryData {
 struct ThriftPatientData {
 		// идентификатор пациента
 	1: string patientID,
+		// идентификатор пациента как гражданина Грузии
+	2: string nationalID,
 		// Фамилия
-	2: string surname,
+	3: string surname,
 		// Имя
-	3: string name,
+	4: string name,
 		// дата рождения
-	4: string dateOfBirth,
+	5: string dateOfBirth,
 		// пол ("F","M","")
-	5: string sex,
+	6: string sex,
+}
+
+struct ThriftPatientPersonalData {
+	// пациент
+	1: ThriftPatientData idInfo,
+	// фото
+	2: string photo,
 }
 
 struct ThriftPatientProfileData {
-		// пациент
-	1: ThriftPatientData patient,
-		// фотография FIXME
-	2: string photo,
-		// семейный доктор
-	3: ThriftFamilyDoctorData familyDoctor,
-		// форма 100
-	4: ThriftPatientSummaryData patientSummary,
-}
-
-service ThriftAuthService {
-	//получение текущего время сервера serverTimestamp и других данных
-	//request пока можно не заполнять
-	//авторизация не требуется
-	ThriftPingResponse ping( 1: ThriftRequestCommonData request ) throws ( 1: ThriftException ex ),
-
-	//получение названия последней версии First Aid Info
-	//request пока можно не заполнять
-	//авторизация не требуется
-	string getFirstAidInfoVersion( 1: ThriftRequestCommonData request ) throws ( 1: ThriftException ex ),
-
-	//получение zip-архива последней версии First Aid Info
-	//request пока можно не заполнять
-	//авторизация не требуется
-	binary getFirstAidInfoArchive( 1: ThriftRequestCommonData request ) throws ( 1: ThriftException ex ),
-	
-	//авторизация на сервере
-	//возвращаю признак успешной авторизации
-	//request.userLogin - телефон
-	//request.authToken - код подтверждения
-	//request.deviceId  - id устройства
-	//request.pushToken - токен для отправки push-уведомления
-	//При неудачной регистрации exception ex.typeCode = AUTHENTICATION_FAILED
-	//test: для пользователей TEST_PATIENT,TEST_DOCTOR,TEST_REPORT возвращаю true
-	bool login( 1: ThriftRequestCommonData request ) throws ( 1: ThriftException ex ),
-
-	//получение данных пользователя
-	//возвращаю данные профиля пользователя
-	//request.userLogin - телефон
-	//request.authToken - код подтверждения
-	//При неудачной регистрации exception ex.typeCode = AUTHENTICATION_FAILED
-	//test: для пользователей TEST_PATIENT,TEST_DOCTOR,TEST_REPORT возвращаю тестовые данные
-	ThriftUserData getUserData( 1: ThriftRequestCommonData request ) throws ( 1: ThriftException ex ),
-
-	//Подтверждение кода Organizaton Unit (для роли Doctor) (5.7.2)
-	//возвращаю данные профиля пользователя
-	//request.userLogin - телефон
-	//request.authToken - код подтверждения
-	//orgUnit           - код организации
-	//При неудачной регистрации exception ex.typeCode = AUTHENTICATION_FAILED
-	//test: для пользователя TEST_DOCTOR возвращаю true
-	bool doctorOrgUnit( 1: ThriftRequestCommonData request, 2: string orgUnit ) throws ( 1: ThriftException ex ),
-}
-
-service ThriftPatientService {
-	//Получения списка кейсов по пациенту(5.6.7.1,5.6.8.1,6.1.5,6.1.8)
-	list<ThriftCaseData> getPatientCases( 1: string patientId, 2: string dateStart, 3: string dateEnd ) throws ( 1: ThriftException ex ),
-
-	//Получение списка лекраственных назначений по пациенту (6.1.6,6.1.9)
-	list<ThriftSectionMedicationData> getPatientMedications( 1: string patientId ) throws ( 1: ThriftException ex ),
-}
-
-service ThriftDoctorService {
-
-	//Получение профиля пациента (6.1.7,6.1.8.2)
-	ThriftPatientProfileData getPatientProfile( 1: string patientId ) throws ( 1: ThriftException ex ),
-
-	//Поиск пациента (п.5.6.8.1,6.1.8,6.1.9)
-	list<ThriftPatientData> findPatients( 1: ThriftPatientData findPatientData ) throws ( 1: ThriftException ex ),
-
-	//Получения списка последних кейсов для доктора (5.6.8.1,6.1.8)
-	list<ThriftCaseData> getLastDoctorCases( 1: string doctorPatientId, 2: i32 listSizeMax ) throws ( 1: ThriftException ex ),
-
-	//Получение детализации кейса (5.6.7.1,5.6.8.1,6.1.5.1,6.1.8)
-	ThriftCaseDetailData getCaseDetail( 1: string caseId, 2: string patientId ) throws ( 1: ThriftException ex ),
-
-	//Обновить кейс (п.5.6.8.1,п.6.1.8)
-	bool updateCaseDetail( 1: ThriftCaseDetailData caseDetailData) throws ( 1: ThriftException ex ),
-
-	//Добавить кейс (п.5.6.8.1,п.6.1.8)
-	ThriftCaseDetailData insertCaseDetail( 1: ThriftCaseDetailData caseDetailData) throws ( 1: ThriftException ex ),
-
-	//Получения списка последних рецептов для доктора (6.1.9)
-	list<ThriftSectionMedicationData> getLastDoctorMedications( 1: string doctorPatientId, 2: i32 listSizeMax ) throws ( 1: ThriftException ex ),
-
-}
-
