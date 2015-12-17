@@ -13,7 +13,7 @@ import java.util.List;
 public class EMRClient {
 
     private static final String PATIENT_ID_1 = "'01009006987^^^&1.3.6.1.4.1.21367.2005.3.7&ISO'";
-    private static final String PATIENT_ID_2 = "'843018^^^&1.3.6.1.4.1.21367.2005.3.7&ISO'";
+    private static final String PATIENT_ID_2 =      "'843018^^^&1.3.6.1.4.1.21367.2005.3.7&ISO'";
     private final static String REMOTE_ADDRESS_PATIENT = "http://92.51.96.102:80/ThriftPatientServlet";
     private final static String REMOTE_ADDRESS_DOCTOR = "http://92.51.96.102:80/ThriftDoctorServlet";
     private static final String CASE_ID1 = "5a6fc281-5fb5-4422-a412-74a649cfd871";
@@ -25,6 +25,7 @@ public class EMRClient {
         System.out.println("Args count - " + args.length);
         List<ThriftCaseData> emrCases;
         ThriftCaseDetailData emrCasesDetails;
+        List<ThriftSectionMedicationData> medications;
 
         Timing timing;
         String patientID;
@@ -56,13 +57,13 @@ public class EMRClient {
 
 
             // Create ThriftPatientService client
-            ThriftPatientService.Client client = new ThriftPatientService.Client(protocol);
+            ThriftPatientService.Client clientPatientService = new ThriftPatientService.Client(protocol);
 
             // Send request getPatientCases
             System.out.println("Request " + patientID + " patient cases...");
 
             timing.start();
-            emrCases = client.getPatientCases(patientID,"","");
+            emrCases = clientPatientService.getPatientCases(patientID,"","");
             timing.stop();
             System.out.println(timing.toString());
 
@@ -124,6 +125,24 @@ public class EMRClient {
                 System.out.println("Result:\n" + casesOutputString);
 
             }
+
+            //------------------------------ Medication ----------------------------------------------
+            System.out.println("My Medication for ID: " + patientID);
+
+            timing.start();
+            medications = clientPatientService.getPatientMedications(patientID);
+            timing.stop();
+            System.out.println(timing.toString());
+
+            String medicationsOutputString  ="";
+            for(ThriftSectionMedicationData medication: medications) {
+                medicationsOutputString += medication.toString() + "\n";
+            }
+
+            System.out.println(medicationsOutputString);
+
+            //--------------------------------end medication-------------------------------------------------------------
+
             // Close transport
             transport2.close();
 

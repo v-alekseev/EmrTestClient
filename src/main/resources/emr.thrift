@@ -207,7 +207,7 @@ struct ThriftFamilyDoctorData {
 	5: string telephone,
 }
 
-struct ThriftForm100Data {
+struct ThriftPatientSummaryData {
 		// данные
 	1: string data,
 }
@@ -225,7 +225,7 @@ struct ThriftPatientData {
 	5: string sex,
 }
 
-struct ThriftPatientDetailData {
+struct ThriftPatientProfileData {
 		// пациент
 	1: ThriftPatientData patient,
 		// фотография FIXME
@@ -233,7 +233,7 @@ struct ThriftPatientDetailData {
 		// семейный доктор
 	3: ThriftFamilyDoctorData familyDoctor,
 		// форма 100
-	4: ThriftForm100Data form100,
+	4: ThriftPatientSummaryData patientSummary,
 }
 
 service ThriftAuthService {
@@ -291,7 +291,7 @@ service ThriftPatientService {
 service ThriftDoctorService {
 
 	//Получение профиля пациента (6.1.7,6.1.8.2)
-	ThriftPatientDetailData getPatientDetail( 1: string patientId ) throws ( 1: ThriftException ex ),
+	ThriftPatientProfileData getPatientProfile( 1: string patientId ) throws ( 1: ThriftException ex ),
 
 	//Поиск пациента (п.5.6.8.1,6.1.8,6.1.9)
 	list<ThriftPatientData> findPatients( 1: ThriftPatientData findPatientData ) throws ( 1: ThriftException ex ),
