@@ -1,7 +1,6 @@
 package ru.baccasoft;
 
 import org.apache.thrift.TException;
-import org.apache.thrift.protocol.TJSONProtocol;
 import org.apache.thrift.transport.THttpClient;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -12,15 +11,24 @@ import java.util.List;
 
 public class EMRClient {
 
+
+
+    private static final String PATIENT_NATIONAL_ID_3 =      "62004007234";
+    private static final String PATIENT_ID_3 =      "'62004007234^^^&1.3.6.1.4.1.21367.2005.3.7&ISO'";
+    private static final String PATIENT_PASSWORD_3 =      "123";
+    private static final String PATIENT_NAME_3 =      "test";
+
     private static final String PATIENT_NAME_1 =      "test";
     private static final String PATIENT_SURNAME_1 =      "test";
     private static final String PATIENT_dateOfBirth_1 =      "19801226"; //дате рождения(YYYYMMDD)
     private static final String PATIENT_NATIONAL_ID_1 =      "01009006987";
     private static final String PATIENT_ID_1 = "'01009006987^^^&1.3.6.1.4.1.21367.2005.3.7&ISO'";
-    private static final String PATIENT_ID_1_PASS =      "123";
+    private static final String PATIENT_PASSWORD_1 =      "123";
+
     private static final String PATIENT_NATIONAL_ID_2 =      "843018";
     private static final String PATIENT_ID_2 =      "'843018^^^&1.3.6.1.4.1.21367.2005.3.7&ISO'";
-    private static final String PATIENT_ID_2_PASS =      "123";
+    private static final String PATIENT_PASSWORD_2 =      "123";
+
     private final static String REMOTE_ADDRESS_PATIENT = "http://92.51.96.102:80/ThriftPatientServlet";
     private final static String REMOTE_ADDRESS_DOCTOR = "http://92.51.96.102:80/ThriftDoctorServlet";
     private final static String REMOTE_ADDRESS_AUTH = "http://92.51.96.102:80/ThriftAuthServlet";
@@ -38,20 +46,30 @@ public class EMRClient {
         List<ThriftPatientPersonalData>  patients;
 
         Timing timing;
-        String patientID;
+
+/*
+        String patientID = PATIENT_ID_3;
+        String nationalID = PATIENT_NATIONAL_ID_3;
+        String passPatient = PATIENT_PASSWORD_3;
+        String patientName = PATIENT_NAME_3;
+*/
+        String patientID = PATIENT_ID_3;
+        String nationalID = PATIENT_NATIONAL_ID_3;
+        String passPatient = PATIENT_PASSWORD_3;
+        String patientName = PATIENT_NAME_3;
 
         String casesOutputString;
 
         try {
 
-
+/*
             if (args.length != 1) {
-                patientID = PATIENT_ID_2;
+                patientID = PATIENT_ID_3;
                 System.out.println("Patient ID is missing. Will be use " + patientID + " patient ID.\n");
              }
             else
                 patientID = args[0].toUpperCase();
-
+*/
 
 
             timing = new Timing();
@@ -70,11 +88,11 @@ public class EMRClient {
             ThriftAuthService.Client clientThriftAuthService = new ThriftAuthService.Client(protocol3);
 
             // Send request getPatientCases
-            System.out.println("===================== Request " + PATIENT_NATIONAL_ID_1 + " patient; password " + PATIENT_ID_1_PASS +" ...");
+            System.out.println("===================== Request " + nationalID + " patient; password " + passPatient +" ...");
 
             ThriftRequestCommonData authRequest = new ThriftRequestCommonData();
-            authRequest.setUserLogin(PATIENT_NATIONAL_ID_1);
-            authRequest.setPassword(PATIENT_ID_1_PASS);
+            authRequest.setUserLogin(nationalID);
+            authRequest.setPassword(passPatient);
 
             boolean isAuth;
             timing.start();
@@ -193,11 +211,11 @@ public class EMRClient {
 
 
             //------------------------------ getPatientProfile ----------------------------------------------
-            System.out.println("===================== Request Get Patient Profile for ID: " + PATIENT_NATIONAL_ID_1);
+            System.out.println("===================== Request Get Patient Profile for ID: " + nationalID);
 
             ThriftPatientProfileData patientProfile;
             timing.start();
-            patientProfile = clientDoctor.getPatientProfile(PATIENT_NATIONAL_ID_1);
+            patientProfile = clientDoctor.getPatientProfile(nationalID);
             timing.stop();
             System.out.println(timing.toString());
 
@@ -208,11 +226,11 @@ public class EMRClient {
 
             //------------------------------ findPatientById ----------------------------------------------
             //Поиск пациента по Id, Id - не в ISO-формате!
-            System.out.println("===================== Request findPatientByID: " + PATIENT_NATIONAL_ID_1);
+            System.out.println("===================== Request findPatientByID: " + nationalID);
 
             ThriftPatientPersonalData patientPersonalData;
             timing.start();
-            patientPersonalData = clientDoctor.findPatientById(PATIENT_NATIONAL_ID_1);
+            patientPersonalData = clientDoctor.findPatientById(nationalID);
             timing.stop();
             System.out.println(timing.toString());
 
@@ -222,11 +240,11 @@ public class EMRClient {
 
             //------------------------------ findPatientByName ----------------------------------------------
             //Поиск пациента по Id, Id - не в ISO-формате!
-            System.out.println("===================== Request findPatientByName: " + PATIENT_NATIONAL_ID_1);
+            System.out.println("===================== Request findPatientByName: " + patientName);
 
             //ThriftPatientPersonalData patientPersonalData;
             timing.start();
-            patients = clientDoctor.findPatientByName(PATIENT_NAME_1,"","");
+            patients = clientDoctor.findPatientByName(patientName,"","");
             timing.stop();
             System.out.println(timing.toString());
 
@@ -246,3 +264,4 @@ public class EMRClient {
         }
     }
 }
+
